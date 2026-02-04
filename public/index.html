@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DAO Advisor | AI Governance Assistant</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding-top: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #9945FF, #14F195);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+    }
+
+    .dao-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .dao-card {
+      background: #0d0d1a;
+      border: 2px solid #222;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dao-card:hover {
+      border-color: #9945FF;
+      transform: translateY(-2px);
+    }
+
+    .dao-card.active {
+      border-color: #14F195;
+      background: #14F19510;
+    }
+
+    .dao-token {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .dao-name {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .dao-category {
+      font-size: 10px;
+      color: #9945FF;
+      margin-top: 6px;
+    }
+
+    .proposals-section {
+      display: none;
+    }
+
+    .proposals-section.show {
+      display: block;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .badge {
+      background: #9945FF33;
+      color: #9945FF;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .proposal-card {
+      background: #0d0d1a;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .proposal-card:hover {
+      border-color: #444;
+    }
+
+    .proposal-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .proposal-desc {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .proposal-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .votes-bar {
+      height: 6px;
+      background: #ff4d4d;
+      border-radius: 3px;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+
+    .votes-for {
+      height: 100%;
+      background: #14F195;
+      border-radius: 3px;
+    }
+
+    .analysis-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .analysis-modal.show {
+      display: block;
+    }
+
+    .modal-content {
+      max-width: 700px;
+      margin: 40px auto;
+      background: #0d0d1a;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid #333;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: #fff;
+    }
+
+    .recommendation-box {
+      text-align: center;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .recommendation-box.yes {
+      background: #14F19520;
+      border: 2px solid #14F195;
+    }
+
+    .recommendation-box.no {
+      background: #ff4d4d20;
+      border: 2px solid #ff4d4d;
+    }
+
+    .recommendation-box.abstain {
+      background: #f7931e20;
+      border: 2px solid #f7931e;
+    }
+
+    .rec-label {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .rec-value {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .rec-value.yes { color: #14F195; }
+    .rec-value.no { color: #ff4d4d; }
+    .rec-value.abstain { color: #f7931e; }
+
+    .confidence {
+      font-size: 14px;
+      color: #888;
+      margin-top: 8px;
+    }
+
+    .analysis-section {
+      margin-bottom: 20px;
+    }
+
+    .analysis-section h3 {
+      font-size: 14px;
+      color: #9945FF;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .analysis-text {
+      color: #ccc;
+      line-height: 1.7;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #555;
+      font-size: 13px;
+    }
+
+    .footer a {
+      color: #9945FF;
+      text-decoration: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #555;
+    }
+
+    .preferences {
+      background: #0d0d1a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .preferences.show {
+      display: block;
+    }
+
+    .pref-title {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .pref-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pref-btn {
+      padding: 6px 12px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: transparent;
+      color: #888;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .pref-btn.active {
+      border-color: #14F195;
+      color: #14F195;
+      background: #14F19510;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>DAO Advisor</h1>
+    <p class="subtitle">AI-powered governance recommendations</p>
+
+    <div class="dao-grid" id="daoGrid">
+      <div class="loading">Loading DAOs...</div>
+    </div>
+
+    <div class="preferences" id="preferences">
+      <div class="pref-title">Your Priorities (click to select)</div>
+      <div class="pref-options">
+        <button class="pref-btn active" data-pref="decentralization">Decentralization</button>
+        <button class="pref-btn active" data-pref="security">Security</button>
+        <button class="pref-btn" data-pref="growth">Growth</button>
+        <button class="pref-btn" data-pref="yield">Yield/Returns</button>
+        <button class="pref-btn" data-pref="community">Community</button>
+      </div>
+    </div>
+
+    <div class="proposals-section" id="proposalsSection">
+      <div class="section-header">
+        <span class="section-title" id="proposalsTitle">Proposals</span>
+        <span class="badge" id="proposalCount">0 active</span>
+      </div>
+      <div id="proposalsList"></div>
+    </div>
+  </div>
+
+  <div class="analysis-modal" id="analysisModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Proposal Analysis</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="modalBody">
+        <div class="loading">Analyzing proposal...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Built by <a href="https://github.com/occydefi/dao-advisor">DAO-Advisor Agent</a> for Colosseum Hackathon
+  </div>
+
+  <script>
+    let selectedDAO = null;
+    let currentProposals = [];
+    let userPriorities = ['decentralization', 'security'];
+
+    // Load DAOs
+    async function loadDAOs() {
+      try {
+        const res = await fetch('/api/daos');
+        const daos = await res.json();
+
+        document.getElementById('daoGrid').innerHTML = daos.map(dao => `
+          <div class="dao-card" onclick="selectDAO('${dao.id}')">
+            <div class="dao-token">${dao.token}</div>
+            <div class="dao-name">${dao.name}</div>
+            <div class="dao-category">${dao.category}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        document.getElementById('daoGrid').innerHTML = `<div class="loading">Error loading DAOs</div>`;
+      }
+    }
+
+    // Select DAO
+    async function selectDAO(daoId) {
+      selectedDAO = daoId;
+
+      // Update UI
+      document.querySelectorAll('.dao-card').forEach(card => {
+        card.classList.remove('active');
+        if (card.onclick.toString().includes(daoId)) {
+          card.classList.add('active');
+        }
+      });
+
+      document.getElementById('preferences').classList.add('show');
+      document.getElementById('proposalsSection').classList.add('show');
+      document.getElementById('proposalsList').innerHTML = '<div class="loading">Loading proposals...</div>';
+
+      try {
+        const res = await fetch(`/api/proposals/${daoId}`);
+        const data = await res.json();
+
+        currentProposals = data.proposals;
+        document.getElementById('proposalsTitle').textContent = `${data.dao.name} Proposals`;
+        document.getElementById('proposalCount').textContent = `${data.totalActive} active`;
+
+        if (data.proposals.length === 0) {
+          document.getElementById('proposalsList').innerHTML = '<div class="empty-state">No active proposals</div>';
+          return;
+        }
+
+        document.getElementById('proposalsList').innerHTML = data.proposals.map(p => {
+          const total = (p.votesFor || 0) + (p.votesAgainst || 0);
+          const forPercent = total > 0 ? (p.votesFor / total * 100) : 50;
+
+          return `
+            <div class="proposal-card" onclick="analyzeProposal('${p.id}')">
+              <div class="proposal-title">${p.title}</div>
+              <div class="proposal-desc">${p.description.substring(0, 150)}...</div>
+              <div class="votes-bar">
+                <div class="votes-for" style="width: ${forPercent}%"></div>
+              </div>
+              <div class="proposal-meta">
+                <span>For: ${(p.votesFor || 0).toLocaleString()}</span>
+                <span>Against: ${(p.votesAgainst || 0).toLocaleString()}</span>
+                <span>Ends: ${p.endDate || 'TBD'}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        document.getElementById('proposalsList').innerHTML = `<div class="loading">Error: ${err.message}</div>`;
+      }
+    }
+
+    // Analyze proposal
+    async function analyzeProposal(proposalId) {
+      const proposal = currentProposals.find(p => p.id === proposalId);
+      if (!proposal) return;
+
+      document.getElementById('analysisModal').classList.add('show');
+      document.getElementById('modalTitle').textContent = proposal.title;
+      document.getElementById('modalBody').innerHTML = '<div class="loading">Analyzing proposal with AI...</div>';
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            proposal,
+            userPreferences: { priorities: userPriorities }
+          }),
+        });
+
+        const data = await res.json();
+
+        const recClass = data.recommendation.toLowerCase();
+
+        document.getElementById('modalBody').innerHTML = `
+          <div class="recommendation-box ${recClass}">
+            <div class="rec-label">AI RECOMMENDATION</div>
+            <div class="rec-value ${recClass}">VOTE ${data.recommendation}</div>
+            <div class="confidence">Confidence: ${data.confidence}</div>
+          </div>
+
+          <div class="analysis-section">
+            <h3>Full Analysis</h3>
+            <div class="analysis-text">${data.analysis}</div>
+          </div>
+        `;
+      } catch (err) {
+        document.getElementById('modalBody').innerHTML = `<div class="loading">Error: ${err.message}</div>`;
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('analysisModal').classList.remove('show');
+    }
+
+    // Preferences
+    document.querySelectorAll('.pref-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+        updatePriorities();
+      });
+    });
+
+    function updatePriorities() {
+      userPriorities = Array.from(document.querySelectorAll('.pref-btn.active'))
+        .map(btn => btn.dataset.pref);
+    }
+
+    // Close modal on escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Close modal on outside click
+    document.getElementById('analysisModal').addEventListener('click', (e) => {
+      if (e.target.id === 'analysisModal') closeModal();
+    });
+
+    // Init
+    loadDAOs();
+  </script>
+</body>
+</html>

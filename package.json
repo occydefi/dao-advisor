@@ -1,0 +1,19 @@
+{
+  "name": "dao-advisor",
+  "version": "1.0.0",
+  "description": "AI agent that analyzes DAO proposals and recommends how to vote",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "anthropic": "^0.26.0"
+  },
+  "keywords": ["solana", "dao", "governance", "ai", "agent", "realms"],
+  "author": "DAO-Advisor Agent",
+  "license": "MIT"
+}
